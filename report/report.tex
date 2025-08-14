@@ -1,0 +1,76 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\title{Personalized Vegan Food Recommender System Using a Hybrid Machine Learning Approach}
+
+\author{
+\IEEEauthorblockN{Zuriel Aviles}
+\IEEEauthorblockA{
+\textit{B.S. Computer Science, Cognitive Science} \\
+\textit{Rensselaer Polytechnic Institute}\\
+Troy, New York \\
+avilez@rpi.edu}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+With the growing interest in plant-based diets, there's an increasing need for tools that support personalized food recommendations. This paper presents a hybrid vegan food recommender system leveraging both content-based and collaborative filtering, trained on open recipe datasets. We demonstrate the effectiveness of integrating user preferences, nutritional information, and sentiment from user reviews using machine learning models.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Recommender Systems, Content-Based Filtering, Collaborative Filtering, Vegan, Machine Learning, Nutrition, NLP
+\end{IEEEkeywords}
+
+\section{Introduction}
+Explain the rise of veganism, the information overload problem in recipe platforms, and the limitations of existing food recommendation systems. Introduce your goal of building a personalized recommender.
+
+\section{Related Work}
+Summarize key works (e.g., from NYC Data Science Capstone, RecSys literature, and hybrid recommendation techniques). Highlight the gap your system fills.
+
+\section{Dataset and Preprocessing}
+Detail the datasets used: e.g., \textit{Food.com}, \textit{RecipeNLG}, Spoonacular API. Discuss how you filtered vegan recipes and engineered features (ingredients, nutrition, user reviews).
+
+\section{Methodology}
+\subsection{Content-Based Filtering}
+Explain ingredient vectorization (TF-IDF, embeddings) and similarity metrics.
+
+\subsection{Collaborative Filtering}
+Mention matrix factorization or k-NN methods based on user-item interactions.
+
+\subsection{Hybrid Approach}
+Describe how you combine the above (e.g., weighted average, model stacking).
+
+\subsection{Incorporating NLP and Sentiment}
+Explain review processing using NLP, extracting sentiment to refine recommendations.
+
+\section{Model Training and Evaluation}
+Detail model training procedures, data splits, and evaluation metrics (precision, recall, F1, user satisfaction if applicable).
+
+\section{Results and Discussion}
+Present results with tables/graphs. Analyze which models performed best and why.
+
+\section{Conclusion and Future Work}
+Summarize contributions. Suggest extensions such as deep learning, real-time feedback, voice interface, or health goal optimization.
+
+\section*{Acknowledgment}
+Optionally acknowledge your advisor, dataset providers, or any funding.
+
+\begin{thebibliography}{00}
+\bibitem{b1} NYC Data Science Academy, "Recipe Recommendation Using NLP and Clustering," https://nycdatascience.com/blog/student-works/capstone/recipe-recommendation/
+\bibitem{b2} Other references from your proposal or citation list.
+\end{thebibliography}
+
+\end{document}
