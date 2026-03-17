@@ -1,0 +1,131 @@
+.recommender-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.recommender-hero {
+  text-align: center;
+  padding: 2rem;
+  background: linear-gradient(135deg, rgba(39, 174, 96, 0.05) 0%, rgba(34, 153, 84, 0.05) 100%);
+  border-radius: 12px;
+  border: 2px solid rgba(39, 174, 96, 0.1);
+}
+
+.recommender-hero h2 {
+  font-size: 2rem;
+  color: #27ae60;
+  margin-bottom: 0.5rem;
+}
+
+.recommender-hero p {
+  color: #666;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.recommender-form {
+  width: 100%;
+}
+
+.input-group {
+  display: flex;
+  gap: 0.8rem;
+  width: 100%;
+}
+
+.recommender-input {
+  flex: 1;
+  padding: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.recommender-input:focus {
+  outline: none;
+  border-color: #27ae60;
+  box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+}
+
+.recommend-btn {
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+  color: white;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
+}
+
+.recommend-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.4);
+}
+
+.recommend-btn:disabled {
+  background: #bbb;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.error-message {
+  padding: 1rem;
+  background: #ffe0e0;
+  color: #c0392b;
+  border-radius: 8px;
+  border-left: 4px solid #e74c3c;
+  font-weight: 500;
+}
+
+.no-results {
+  padding: 2rem;
+  background: #f0f2f5;
+  border-radius: 8px;
+  text-align: center;
+  color: #666;
+  font-size: 1rem;
+}
+
+.recommendations-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.recommendations-container h3 {
+  color: #27ae60;
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.recipes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .input-group {
+    flex-direction: column;
+  }
+
+  .recommend-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .recommender-hero h2 {
+    font-size: 1.5rem;
+  }
+
+  .recipes-grid {
+    grid-template-columns: 1fr;
+  }
+}

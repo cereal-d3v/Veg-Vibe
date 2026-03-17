@@ -1,0 +1,21 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install dependencies
+COPY frontend/package*.json ./
+RUN npm ci
+
+# Copy source code
+COPY frontend/src ./src
+COPY frontend/index.html .
+COPY frontend/vite.config.js .
+
+# Build
+RUN npm run build
+
+# Expose port
+EXPOSE 5173
+
+# Start dev server
+CMD ["npm", "run", "dev"]
