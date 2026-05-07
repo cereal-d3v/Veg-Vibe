@@ -17,13 +17,28 @@ Veg-Vibe is a **Personalized Vegan Food Recommender System** powered by agentic 
 ## 📚 Documentation
 
 ### For Understanding the Architecture
-- **[RELIABLE_SOURCES.md](./RELIABLE_SOURCES.md)** - Complete technical guide to the verification pipeline
   - Two-Step Verification Pattern (Step A: Search, Step B: Verify)
   - External data sources and their roles
   - System prompt enforcement
   - Bootstrap dataset setup
   - Debugging guide
 
+### For Turing Grant Context
+### For High-Fidelity Document Parsing (NEW! 📄)
+- **[DOCLING_INTEGRATION.md](./DOCLING_INTEGRATION.md)** - High-fidelity PDF parsing with Docling
+  - Table-aware chunking strategy
+  - Metadata extraction and citation generation
+  - Vector database compatibility (Chroma, Pinecone, Weaviate)
+  - Table preservation for hallucination prevention
+  - Complete API reference
+  
+- **[RAG_BEST_PRACTICES.md](./RAG_BEST_PRACTICES.md)** - Implementation guide for document-aware RAG
+  - Step-by-step workflow with code examples
+  - Common pitfalls and solutions
+  - Performance optimization strategies
+  - Testing and validation patterns
+  - Production readiness checklist
+  
 ### For Turing Grant Context
 - **[TURING_APPLICATION.md](./TURING_APPLICATION.md)** - How Veg-Vibe demonstrates "complex data source" + "reliable interface" requirements
   - Maps architecture to Turing requirements
