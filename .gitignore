@@ -10,3 +10,4 @@ venv/
 .env.local
 .vscode/
 *.log
+data/RecipeNLG.csv

@@ -1,7 +1,7 @@
 import json
 import logging
 import re
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from app.prompts import (
     SYSTEM_GROUNDED_PROMPT,
@@ -276,3 +276,131 @@ class AgenticRecipeAssistant:
             ],
             "verification_stats": self.verification_agent.get_verification_stats(),
         }
+
+
+class DocumentAwareAssistant(AgenticRecipeAssistant):
+    """
+    Enhanced agentic assistant with support for document metadata.
+    
+    Extends AgenticRecipeAssistant to:
+    - Track document sources (PDF pages, tables, sections)
+    - Generate specific citations (e.g., "Table 3 in PETA Guide, p. 15")
+    - Provide source-specific reliability scores
+    - Support "According to [Document]..." phrasing in responses
+    """
+    
+    def __init__(
+        self,
+        recommender: RecipeRecommender,
+        document_chunks: Optional[List[Dict[str, Any]]] = None,
+    ):
+        super().__init__(recommender)
+        self.document_chunks = document_chunks or []
+        logger.info(f"✓ DocumentAwareAssistant initialized with {len(self.document_chunks)} document chunks")
+    
+    def add_document_chunks(self, chunks: List[Dict[str, Any]]) -> None:
+        """Add document chunks from Docling parsing."""
+        self.document_chunks.extend(chunks)
+        logger.info(f"Added {len(chunks)} document chunks (total: {len(self.document_chunks)})")
+    
+    def _find_supporting_documents(self, query: str) -> List[Dict[str, Any]]:
+        """
+        Find document chunks that support the query.
+        
+        Returns list of chunks with source attribution.
+        """
+        supporting = []
+        query_lower = query.lower()
+        
+        for chunk in self.document_chunks:
+            content_lower = chunk.get("content", "").lower()
+            
+            # Check for keyword matches
+            if any(word in content_lower for word in query_lower.split()):
+                supporting.append(chunk)
+        
+        logger.info(f"Found {len(supporting)} supporting document chunks for query")
+        return supporting
+    
+    def _build_document_citation(self, chunk: Dict[str, Any]) -> str:
+        """Build a citation string from document chunk metadata."""
+        source = chunk.get("source", "Unknown")
+        page = chunk.get("page", "?")
+        section = chunk.get("section", None)
+        table_title = chunk.get("table_title", None)
+        
+        citation_parts = [f"{source} (p. {page})"]
+        
+        if table_title:
+            citation_parts.append(f"Table: {table_title}")
+        elif section:
+            citation_parts.append(f"Section: {section}")
+        
+        return ", ".join(citation_parts)
+    
+    def _format_answer_with_sources(
+        self,
+        base_answer: str,
+        supporting_docs: List[Dict[str, Any]],
+    ) -> str:
+        """
+        Enhance base answer with specific document citations.
+        
+        Transforms generic answer into source-attributed answer.
+        """
+        if not supporting_docs:
+            return base_answer
+        
+        # Build source attribution
+        source_lines = ["---", "**Sources:**"]
+        for chunk in supporting_docs[:5]:  # Top 5 sources
+            citation = self._build_document_citation(chunk)
+            source_lines.append(f"- According to {citation}")
+        
+        return base_answer + "\n\n" + "\n".join(source_lines)
+    
+    def answer_with_documents(
+        self,
+        question: str,
+        max_results: int = 5,
+        include_document_sources: bool = True,
+    ) -> Dict[str, Any]:
+        """
+        Answer question with document-aware citations.
+        
+        Args:
+            question: User query
+            max_results: Max recipe results
+            include_document_sources: Whether to include document citations
+            
+        Returns:
+            Enhanced response with document source attribution
+        """
+        # Get base answer from parent class
+        base_response = self.answer(question, max_results)
+        
+        # Find supporting documents
+        supporting_docs = self._find_supporting_documents(question)
+        
+        # Enhance answer if documents exist
+        if include_document_sources and supporting_docs:
+            enhanced_answer = self._format_answer_with_sources(
+                base_response["answer"],
+                supporting_docs,
+            )
+            base_response["answer"] = enhanced_answer
+            base_response["document_sources"] = [
+                {
+                    "id": doc.get("id"),
+                    "source": doc.get("source"),
+                    "page": doc.get("page"),
+                    "citation": self._build_document_citation(doc),
+                    "is_table": doc.get("is_table", False),
+                }
+                for doc in supporting_docs[:5]
+            ]
+        else:
+            base_response["document_sources"] = []
+        
+        return base_response
+
