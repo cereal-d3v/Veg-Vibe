@@ -14,7 +14,11 @@ import json
 import logging
 from typing import Any, Dict, List, Tuple
 
-from app.ingestion.docling_parser import ChunkedDocument, TableAwareChunk
+try:
+    from app.ingestion.docling_parser import ChunkedDocument, TableAwareChunk
+except Exception:  # pragma: no cover - allow running without Docling installed
+    ChunkedDocument = object
+    TableAwareChunk = object
 
 logger = logging.getLogger("vegvibe.vectordb_compat")
 

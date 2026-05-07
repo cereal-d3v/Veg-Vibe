@@ -18,7 +18,7 @@ from urllib.parse import urlparse
 
 import requests
 
-from app.ingestion.docling_parser import ChunkedDocument, get_document_processor
+from typing import Any as _Any
 
 try:
     from trafilatura import extract as trafilatura_extract
@@ -75,11 +75,15 @@ def parse_pdf_url(
     pdf_url: str,
     *,
     timeout: int = 60,
-    processor: Optional[Any] = None,
-) -> ChunkedDocument:
+    processor: Optional[_Any] = None,
+) -> _Any:
     """Download a PDF URL and parse it with Docling."""
 
-    processor = processor or get_document_processor()
+    # Lazy import to avoid importing heavy Docling packages during unit tests
+    if processor is None:
+        from app.ingestion.docling_parser import get_document_processor
+
+        processor = get_document_processor()
     pdf_path = _download_pdf(pdf_url, timeout=timeout)
 
     try:

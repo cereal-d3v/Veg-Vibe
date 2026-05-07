@@ -17,28 +17,13 @@ Veg-Vibe is a **Personalized Vegan Food Recommender System** powered by agentic 
 ## 📚 Documentation
 
 ### For Understanding the Architecture
+- **[RELIABLE_SOURCES.md](./RELIABLE_SOURCES.md)** - Complete technical guide to the verification pipeline
   - Two-Step Verification Pattern (Step A: Search, Step B: Verify)
   - External data sources and their roles
   - System prompt enforcement
   - Bootstrap dataset setup
   - Debugging guide
 
-### For Turing Grant Context
-### For High-Fidelity Document Parsing (NEW! 📄)
-- **[DOCLING_INTEGRATION.md](./DOCLING_INTEGRATION.md)** - High-fidelity PDF parsing with Docling
-  - Table-aware chunking strategy
-  - Metadata extraction and citation generation
-  - Vector database compatibility (Chroma, Pinecone, Weaviate)
-  - Table preservation for hallucination prevention
-  - Complete API reference
-  
-- **[RAG_BEST_PRACTICES.md](./RAG_BEST_PRACTICES.md)** - Implementation guide for document-aware RAG
-  - Step-by-step workflow with code examples
-  - Common pitfalls and solutions
-  - Performance optimization strategies
-  - Testing and validation patterns
-  - Production readiness checklist
-  
 ### For Turing Grant Context
 - **[TURING_APPLICATION.md](./TURING_APPLICATION.md)** - How Veg-Vibe demonstrates "complex data source" + "reliable interface" requirements
   - Maps architecture to Turing requirements
@@ -60,9 +45,6 @@ Veg-Vibe is a **Personalized Vegan Food Recommender System** powered by agentic 
 ### Backend Setup
 
 ```bash
-# 1. Install dependencies
-cd backend
-pip install -r requirements.txt
 
 # 2. Configure environment
 cp .env.example .env
@@ -80,6 +62,54 @@ Server runs at `http://localhost:8000`
 - Health check: http://localhost:8000/health
 
 ### Frontend Setup
+
+
+### Unified Ingestion Tool (PDF & Menu)
+
+The project includes a unified ingestion tool that supports:
+
+- Docling-based PDF ingestion (high-fidelity, table-aware parsing)
+- Trafilatura-based web scraping for restaurant menus (outputs Markdown)
+- A simple vegan-filter that checks extracted text against non-vegan keywords
+
+Location and usage
+
+- Module: `backend/app/ingestion/unified_ingestion.py`
+- Exposed from package: `app.ingestion` (see `ingest_source`, `UnifiedIngestionTool`)
+
+CLI
+
+```bash
+# In backend/ directory
+python -m app.ingestion.unified_ingestion https://example.com/guide.pdf --json
+
+# Scrape a menu URL and print Markdown
+python -m app.ingestion.unified_ingestion https://example.com/menu --type menu
+```
+
+Vegan filter behavior
+
+- The ingestion flow applies a keyword-based filter to extracted Markdown before ingestion.
+- Default non-vegan keywords: `casein`, `whey`, `gelatin` (defined in `NON_VEGAN_KEYWORDS`).
+- The ingestion payload contains `is_vegan` and `matched_keywords` metadata. Example:
+
+```json
+{
+  "is_vegan": false,
+  "matched_keywords": ["whey", "gelatin"]
+}
+```
+
+How to customize
+
+- Change the `NON_VEGAN_KEYWORDS` tuple in `backend/app/ingestion/unified_ingestion.py` to add or remove keywords.
+- For stricter checking, add tokenized or regex-based checks around allergens and ingredient lists.
+
+Integration notes
+
+- PDF ingestion uses Docling via the existing `DocumentProcessor` (table preservation, page metadata).
+- Menu scraping uses Trafilatura (`output_format="markdown"`) to preserve headings and lists.
+- Only content that passes your verification flow should be persisted into your vector DB.
 
 ```bash
 cd frontend
