@@ -17,11 +17,11 @@ RUN apt-get update \
 COPY backend/requirements.txt ./backend/requirements.txt
 
 RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir -r backend/requirements.txt docling-tools \
-    && docling-tools models download
+    && pip install --no-cache-dir -r backend/requirements.txt
 
 COPY backend/app ./app
-COPY vegan_recipes.csv ./vegan_recipes.csv
+COPY backend/tests ./tests
+COPY HuggingFaceSpaces/vegan_recipes.csv ./vegan_recipes.csv
 
 EXPOSE 8000
 
