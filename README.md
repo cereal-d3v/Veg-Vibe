@@ -24,13 +24,6 @@ Veg-Vibe is a **Personalized Vegan Food Recommender System** powered by agentic 
   - Bootstrap dataset setup
   - Debugging guide
 
-### For Turing Grant Context
-- **[TURING_APPLICATION.md](./TURING_APPLICATION.md)** - How Veg-Vibe demonstrates "complex data source" + "reliable interface" requirements
-  - Maps architecture to Turing requirements
-  - Shows agentic behavior with constraints
-  - Explains 3-class hallucination prevention
-  - Competitive advantage analysis
-
 ### For Developers
 - **[APP_README.md](./APP_README.md)** - Application-level documentation
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** - System architecture overview
@@ -110,6 +103,41 @@ Integration notes
 - PDF ingestion uses Docling via the existing `DocumentProcessor` (table preservation, page metadata).
 - Menu scraping uses Trafilatura (`output_format="markdown"`) to preserve headings and lists.
 - Only content that passes your verification flow should be persisted into your vector DB.
+
+### ChromaDB Semantic + Hybrid Search
+
+The backend now includes a ChromaDB vector service for Docling-ingested PDF chunks.
+
+- Service: `backend/app/services/vector_store.py` (`ChromaVectorStore`)
+- Router: `backend/app/routers/vector_search.py`
+- API prefix: `/api/vector`
+
+Stored metadata per chunk (reliability-focused):
+
+- `source_url`
+- `page_number`
+- `document_section`
+
+Endpoints
+
+```bash
+# Parse a PDF URL with Docling and store chunks in ChromaDB
+curl -X POST http://localhost:8000/api/vector/ingest/pdf \
+  -H "Content-Type: application/json" \
+  -d '{"source_url": "https://example.com/menu.pdf"}'
+
+# Hybrid search: semantic similarity + exact keyword matching
+curl -X POST http://localhost:8000/api/vector/search/hybrid \
+  -H "Content-Type: application/json" \
+  -d '{"query": "BrandX oat milk", "limit": 5}'
+```
+
+Hybrid behavior
+
+- Semantic search retrieves conceptually similar chunks.
+- Keyword search uses exact text containment (important for brand-name reliability).
+- Results are merged with weighted scoring and an exact-match boost.
+- This helps ensure exact brand queries do not get buried by only-semantic matches.
 
 ```bash
 cd frontend
@@ -260,9 +288,9 @@ LOG_LEVEL=INFO
 
 ## 🧪 Testing
 
-### Unit Tests (TODO)
+### Unit Tests
 ```bash
-pytest backend/tests/
+pytest backend/tests/ -v
 ```
 
 ### Integration Tests
@@ -297,14 +325,83 @@ LOG_LEVEL=DEBUG python -m uvicorn app.main:app --reload
 
 ### Docker Deployment (Recommended)
 
+#### Prerequisites
+- [Docker Engine](https://docs.docker.com/engine/install/) or [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
+- No other service occupying ports `8000` (backend) or `8001` (ChromaDB)
+
+#### 1. Build the image
+
 ```bash
-# Build images
-docker-compose build
+# From the repo root
+docker build -t veg-vibe-app:latest .
+```
 
-# Start services
-docker-compose up
+#### 2. Run the full stack (app + ChromaDB)
 
-# Access at http://localhost/
+```bash
+docker compose up --build
+```
+
+This starts two containers:
+| Container | Port | Description |
+|-----------|------|-------------|
+| `app` | 8000 | FastAPI backend |
+| `db` | 8001 | ChromaDB vector store |
+
+#### 3. Preview the API
+
+Once the stack is up:
+
+| URL | What it is |
+|-----|------------|
+| http://localhost:8000/docs | Swagger / OpenAPI interactive docs |
+| http://localhost:8000/redoc | ReDoc API reference |
+| http://localhost:8000/health | Health check |
+
+```bash
+# Quick health check
+curl http://localhost:8000/health
+# Expected: {"status":"healthy"}
+```
+
+#### 4. Run the test suite inside Docker
+
+```bash
+# Run all tests against the already-built image
+docker run --rm veg-vibe-app:latest python -m pytest tests/ -v
+```
+
+To run a specific test file:
+
+```bash
+docker run --rm veg-vibe-app:latest python -m pytest tests/test_vector_store.py -v
+```
+
+#### 5. Stop and clean up
+
+```bash
+# Stop containers (preserves volumes)
+docker compose down
+
+# Stop and remove volumes (full reset)
+docker compose down -v
+```
+
+#### Environment variables
+
+Create a `.env` file in the repo root before running `docker compose up`:
+
+```bash
+cp .env.example .env   # then edit .env
+```
+
+Key variables consumed by the container:
+
+```bash
+USDA_API_KEY=your_key_here          # free at https://fdc.nal.usda.gov/
+ENABLE_VERIFICATION=true
+MIN_VERIFICATION_CONFIDENCE=0.7
+LOG_LEVEL=INFO
 ```
 
 ### HuggingFace Spaces
