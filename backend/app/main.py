@@ -6,10 +6,11 @@ import logging
 from pathlib import Path
 from dotenv import load_dotenv
 
-from app.routers import recipes, recommendations
+from app.routers import recipes, recommendations, vector_search
 from app.models.recipe import AgenticQueryRequest, AgenticQueryResponse
 from app.utils.recommend import RecipeRecommender
 from app.utils.agentic_rag import AgenticRecipeAssistant
+from app.services.vector_store import ChromaVectorStore
 from app.services.data_fetcher import (
     get_usda_fetcher,
     get_off_fetcher,
@@ -87,9 +88,18 @@ else:
     print(f"⚠️ CSV file not found at {RECIPES_CSV}")
     agentic_assistant = None
 
+# Initialize vector store for Docling-ingested chunks
+try:
+    vector_store = ChromaVectorStore()
+    vector_search.set_vector_store(vector_store)
+    logger.info("✅ Chroma vector store initialized")
+except Exception as e:
+    logger.warning(f"⚠️  Chroma vector store initialization failed: {e}")
+
 # Include routers
 app.include_router(recipes.router)
 app.include_router(recommendations.router)
+app.include_router(vector_search.router)
 
 # Mount static files (React app)
 frontend_dist = os.path.join(
