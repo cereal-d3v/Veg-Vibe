@@ -16,6 +16,20 @@ from nltk.corpus import stopwords
 STOP_WORDS = set(stopwords.words('english'))
 
 
+def parse_ingredients(ingredients_text: str) -> List[str]:
+    """Parse an ingredient field into normalized list entries."""
+    if not ingredients_text:
+        return []
+
+    text = str(ingredients_text).strip()
+    if not text:
+        return []
+
+    # Split by common delimiters used in CSV recipe ingredient strings.
+    parts = re.split(r"[,;\n|]+", text)
+    return [part.strip() for part in parts if part and part.strip()]
+
+
 def clean_text(text: str) -> str:
     """Clean and normalize text for TF-IDF vectorization."""
     text = re.sub(r'\d+', '', str(text))
